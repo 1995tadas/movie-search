@@ -5,9 +5,10 @@
         class="movie-icon"
         src="../assets/icons/movie.svg"
         alt="Movie icon"
+        :style="{ filter: 'invert(100%)' }"
       />
       <input
-        v-model="query"
+        v-model="inputFirst"
         @keyup="autoComplete"
         @blur="closeAutoComplete"
         placeholder="Enter movie name"
@@ -22,17 +23,27 @@
         />
       </button>
       <template>
-        <div class="movie-datalist" v-show="results.length">
+        <div class="movie-datalist" v-show="results.length" @mousedown.prevent>
+          <div class="datalist-input">
+            <img
+              class="movie-icon"
+              src="../assets/icons/movie.svg"
+              alt="Movie icon"
+              :style="{ width: '20px' }"
+            />
+            <input ref="inputSecond" v-model="inputSecond" @keyup="autoComplete" autofocus/>
+            <span class="search-sub">Enter a movie name</span>
+          </div>
+          <hr>
           <template v-for="(result, index) in results">
             <div
-              v-if="index <= 7"
               class="datalist-item"
+              v-if="index <= 7"
               :key="result.id"
-              @mousedown.prevent
               @click="selectDatalist(result.title)"
             >
               <span class="movie-title">{{ result.title }}</span>
-              <div>
+              <div class="search-sub">
                 <span>{{ result.vote_average }} Rating</span>
                 <span v-if="isDateValid(result.release_date)">
                   , {{ selectYear(result.release_date) }}
@@ -54,6 +65,8 @@ export default {
   data() {
     return {
       query: "",
+      inputFirst: "",
+      inputSecond: "",
       searchUrl: "https://api.themoviedb.org/3/search/movie",
       results: []
     };
@@ -75,7 +88,6 @@ export default {
           }
         })
         .then(response => {
-          console.log(response);
           this.results = response.data.results;
         });
     },
@@ -83,16 +95,25 @@ export default {
       this.results = [];
     },
     selectDatalist(title) {
-      this.query = title;
+      this.inputFirst = title;
       this.closeAutoComplete();
     },
-
     // Dates selection logic
     isDateValid(date) {
       return new RegExp("^\\d{4}-[0,1]\\d-[0,1,2,3]\\d$").test(date);
     },
     selectYear(date) {
       return date.slice(0, 4);
+    }
+  },
+  watch: {
+    inputFirst: function() {
+      this.query = this.inputFirst;
+      this.inputSecond = this.inputFirst;
+    },
+    inputSecond: function() {
+      this.query = this.inputSecond;
+      this.inputFirst = this.inputSecond;
     }
   }
 };
@@ -101,6 +122,7 @@ export default {
 <style scoped lang="scss">
 $input-left-padding: 45px;
 $input-color: #fff;
+$sub-color: #838282;
 $shadow-color: #f3f3f3;
 
 .search-container {
@@ -122,7 +144,6 @@ $shadow-color: #f3f3f3;
       top: 50%;
       transform: translate(-50%, -50%);
       left: 20px;
-      filter: invert(100%);
       width: 25px;
     }
 
@@ -146,8 +167,9 @@ $shadow-color: #f3f3f3;
     }
 
     .search-field,
+    .datalist-input,
     .datalist-item {
-      padding: 15px 0 15px $input-left-padding;
+      padding: 12px 0 12px $input-left-padding;
     }
 
     .search-button {
@@ -182,22 +204,54 @@ $shadow-color: #f3f3f3;
       width: calc(100% - #{$input-left-padding});
       left: $input-left-padding;
       top: 0;
+      margin-top: -10px;
       text-align: left;
       box-shadow: 1px 4px 10px 1px $shadow-color;
+
+      .datalist-input {
+        box-sizing: border-box;
+        background-color: $input-color;
+        position: relative;
+
+        input {
+          display: block;
+          width: 100%;
+          border: 0;
+          padding: 0;
+
+          &:focus {
+            outline: none;
+          }
+        }
+      }
 
       .datalist-item {
         background-color: $input-color;
         cursor: pointer;
+
         &:hover {
           background-color: $shadow-color;
         }
+      }
 
-        .movie-title {
-          font-weight: bold;
-          font-size: 1.2rem;
-        }
+      .movie-title,
+      .datalist-input input {
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+
+      .search-sub {
+        color: $sub-color;
       }
     }
   }
+}
+
+input {
+  text-transform: capitalize;
+}
+
+hr {
+  margin: 0;
 }
 </style>
