@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Search/>
+    <Search />
   </div>
 </template>
 
