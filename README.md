@@ -1,24 +1,23 @@
-# movie_search
+# Movie search app
 
-## Project setup
-```
-npm install
-```
+Movie search autocomplete component
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+# Demo
+https://tadassapitavicius.com/movie-search/
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Task
 
-### Lints and fixes files
-```
-npm run lint
-```
+https://github.com/uiacademy/homework
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Technologies used
+
+- Vue CLI
+- Sass
+- NodeJs for npm packages
+
+## How to deploy
+
+1. Copy all files from this repo
+1. Make sure you have NodeJs installed
+1. Run and `npm install`(needed dependencies will be installed)
+1. Compile all VueJs and sass files by `npm run build `for production
