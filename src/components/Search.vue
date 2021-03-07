@@ -1,7 +1,11 @@
 <template>
   <div class="search-container">
     <div class="search-bar">
+      <span class="movie-icon" v-if="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+      </span>
       <img
+        v-else
         class="movie-icon"
         src="../assets/icons/movie.svg"
         alt="Movie icon"
@@ -23,7 +27,7 @@
         />
       </button>
       <template>
-        <div class="movie-datalist" v-show="results.length" @mousedown.prevent>
+        <div class="movie-datalist" v-if="results.length" @mousedown.prevent>
           <div class="datalist-input">
             <img
               class="movie-icon"
@@ -31,10 +35,10 @@
               alt="Movie icon"
               :style="{ width: '20px' }"
             />
-            <input ref="inputSecond" v-model="inputSecond" @keyup="autoComplete" autofocus/>
+            <input v-model="inputSecond" @keyup="autoComplete" autofocus />
             <span class="search-sub">Enter a movie name</span>
           </div>
-          <hr>
+          <hr />
           <template v-for="(result, index) in results">
             <div
               class="datalist-item"
@@ -67,8 +71,10 @@ export default {
       query: "",
       inputFirst: "",
       inputSecond: "",
+      loading: false,
       searchUrl: "https://api.themoviedb.org/3/search/movie",
-      results: []
+      results: [],
+      timeOut: ""
     };
   },
   methods: {
@@ -80,7 +86,13 @@ export default {
 
         return;
       }
-      axios.get(this.searchUrl, {
+
+      this.loading = true;
+      this.debounce(this.fetchMovies);
+    },
+    fetchMovies() {
+      axios
+        .get(this.searchUrl, {
           params: {
             api_key: "3937f3a23653e2df41f781c8d547cc6e",
             language: "en-US",
@@ -89,6 +101,12 @@ export default {
         })
         .then(response => {
           this.results = response.data.results;
+        })
+        .catch(error => {
+          console.log(error.response.data.status_message);
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
     closeAutoComplete() {
@@ -98,6 +116,16 @@ export default {
       this.inputFirst = title;
       this.closeAutoComplete();
     },
+    debounce(fn) {
+      if (this.timeOut) {
+        clearTimeout(this.timeOut);
+      }
+
+      this.timeOut = setTimeout(function() {
+        fn();
+      }, 500);
+    },
+
     // Dates selection logic
     isDateValid(date) {
       return new RegExp("^\\d{4}-[0,1]\\d-[0,1,2,3]\\d$").test(date);
@@ -112,7 +140,6 @@ export default {
       this.inputSecond = this.inputFirst;
     },
     inputSecond: function() {
-      this.query = this.inputSecond;
       this.inputFirst = this.inputSecond;
     }
   }
@@ -145,6 +172,7 @@ $shadow-color: #f3f3f3;
       transform: translate(-50%, -50%);
       left: 20px;
       width: 25px;
+      color: $input-color;
     }
 
     .search-field {
